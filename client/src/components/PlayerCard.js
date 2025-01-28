@@ -1,10 +1,11 @@
 // client/src/components/PlayerCard.js
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { removePlayer, updatePlayer } from "../features/playersSlice";
 
 export default function PlayerCard({ player }) {
 	const dispatch = useDispatch();
+    const debounceTimerRef = useRef(null);
 
 	// Life & Tax handlers (unchanged)
 	const incrementLife = () => {
@@ -76,12 +77,16 @@ export default function PlayerCard({ player }) {
 		const value = e.target.value;
 		setSearchTerm(value);
 
-		if (value.length > 1) {
-			// Only fetch suggestions if user typed at least 2 characters
-			fetchSuggestions(value);
-		} else {
-			setSuggestions([]);
-		}
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+          }
+  if (value.length > 1) {
+    debounceTimerRef.current = setTimeout(() => {
+      fetchSuggestions(value);
+    }, 300);
+  } else {
+    setSuggestions([]);
+  }
 	};
 
 	// When user clicks on a suggestion
@@ -162,14 +167,27 @@ export default function PlayerCard({ player }) {
 
 				{/* REMOVE Player button */}
 				<button
-					style={{
-						marginTop: "1rem",
-						backgroundColor: "red",
-						display: "inline-block",
-					}}
-					onClick={handleRemove}>
-					Remove Player
-				</button>
+  onClick={handleRemove}
+  style={{
+    position: 'absolute',
+    top: '0.5rem',
+    right: '0.5rem',
+    backgroundColor: 'rgba(67, 0, 0, 0.44)',
+    border: 'none',
+    borderRadius: '50%',
+    width: '32px',
+    height: '32px',
+    color: 'rgb(255, 0, 0)',
+    cursor: 'pointer',
+    fontSize: '16px',
+    lineHeight: '32px',
+    textAlign: 'center',
+    zIndex: 2
+  }}
+>
+  ✕
+</button>
+
 
 				{/* ===================== */}
 				{/* NEW: SEARCH FUNCTION */}
@@ -177,7 +195,7 @@ export default function PlayerCard({ player }) {
 				<div style={{ marginTop: "1rem" }}>
 					{/* Toggle the search bar */}
 					<button onClick={toggleSearch}>
-						{showSearch ? "Close Search" : "Search For Card"}
+                    {showSearch ? '✖' : '🔍'}
 					</button>
 					{showSearch && (
 						<div style={{ marginTop: "1rem" }}>
